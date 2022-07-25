@@ -6,7 +6,7 @@
    -------------------------------------------------------------------------------------
 */
 
-#include "millis.h"
+#include "timing.h"
 
 #include "HX711_ADC.h"
 
@@ -38,8 +38,8 @@ void HX711_ADC::begin(uint8_t gain)
 void HX711_ADC::start(unsigned long t, bool dotare)
 {
 	t += 400;
-	lastDoutLowTime = millis();
-	while(millis() < t) 
+	lastDoutLowTime = timing::millis();
+	while(timing::millis() < t)
 	{
 		update();
 	}
@@ -57,10 +57,10 @@ void HX711_ADC::start(unsigned long t, bool dotare)
 int HX711_ADC::startMultiple(unsigned long t, bool dotare)
 {
 	tareTimeoutFlag = 0;
-	lastDoutLowTime = millis();
+	lastDoutLowTime = timing::millis();
 	if(startStatus == 0) {
 		if(isFirst) {
-			startMultipleTimeStamp = millis();
+			startMultipleTimeStamp = timing::millis();
 			if (t < 400) 
 			{
 				startMultipleWaitTime = t + 400; //min time for HX711 to be stable
@@ -71,14 +71,14 @@ int HX711_ADC::startMultiple(unsigned long t, bool dotare)
 			}
 			isFirst = 0;
 		}	
-		if((millis() - startMultipleTimeStamp) < startMultipleWaitTime) {
+		if((timing::millis() - startMultipleTimeStamp) < startMultipleWaitTime) {
 			update(); //do conversions during stabilization time
 			return 0;
 		}
 		else { //do tare after stabilization time is up
 			if (dotare) 
 			{
-				static unsigned long timeout = millis() + tareTimeOut;
+				static unsigned long timeout = timing::millis() + tareTimeOut;
 				doTare = 1;
 				update();
 				if(convRslt == 2) 
@@ -89,7 +89,7 @@ int HX711_ADC::startMultiple(unsigned long t, bool dotare)
 				}
 				if (!tareTimeoutDisable) 
 				{
-					if (millis() > timeout) 
+					if (timing::millis() > timeout)
 					{ 
 					tareTimeoutFlag = 1;
 					return 1; // Prevent endless loop if no HX711 is connected
@@ -109,13 +109,13 @@ void HX711_ADC::tare()
 	doTare = 1;
 	tareTimes = 0;
 	tareTimeoutFlag = 0;
-	unsigned long timeout = millis() + tareTimeOut;
+	unsigned long timeout = timing::millis() + tareTimeOut;
 	while(rdy != 2) 
 	{
 		rdy = update();
 		if (!tareTimeoutDisable) 
 		{
-			if (millis() > timeout) 
+			if (timing::millis() > timeout)
 			{ 
 				tareTimeoutFlag = 1;
 				break; // Prevent endless loop if no HX711 is connected
@@ -163,13 +163,12 @@ uint8_t HX711_ADC::update()
 	if (!dout) 
 	{
 		conversion24bit();
-		lastDoutLowTime = millis();
+		lastDoutLowTime = timing::millis();
 		signalTimeoutFlag = 0;
 	}
 	else 
 	{
-		//if (millis() > (lastDoutLowTime + SIGNAL_TIMEOUT))
-		if (millis() - lastDoutLowTime > SIGNAL_TIMEOUT)
+		if (timing::millis() - lastDoutLowTime > SIGNAL_TIMEOUT)
 		{
 			signalTimeoutFlag = 1;
 		}
@@ -183,19 +182,18 @@ uint8_t HX711_ADC::update()
 // returns 1 if data available , else 0
 bool HX711_ADC::dataWaitingAsync() 
 {
-	if (dataWaiting) { lastDoutLowTime = millis(); return 1; }
+	if (dataWaiting) { lastDoutLowTime = timing::millis(); return 1; }
 	char dout = (PINB & (1 << PINB0)) >> PINB0;
 	if (!dout) 
 	{
 		dataWaiting = true;
-		lastDoutLowTime = millis();
+		lastDoutLowTime = timing::millis();
 		signalTimeoutFlag = 0;
 		return 1;
 	}
 	else
 	{
-		//if (millis() > (lastDoutLowTime + SIGNAL_TIMEOUT))
-		if (millis() - lastDoutLowTime > SIGNAL_TIMEOUT)
+		if (timing::millis() - lastDoutLowTime > SIGNAL_TIMEOUT)
 		{
 			signalTimeoutFlag = 1;
 		}
@@ -265,7 +263,7 @@ void HX711_ADC::conversion24bit()  //read 24 bit data, store in dataset and star
 		//digitalWrite(sckPin, 1);
 		PORTB |= (1 << PB1);
 
-		if(SCK_DELAY) delayMicroseconds(1); // could be required for faster mcu's, set value in config.h
+		if(SCK_DELAY) timing::delay_us(1); // could be required for faster mcu's, set value in config.h
 
 		//digitalWrite(sckPin, 0);
 		PORTB &= ~(1 << PB1);
@@ -275,7 +273,7 @@ void HX711_ADC::conversion24bit()  //read 24 bit data, store in dataset and star
 			dout = (PINB & (1 << PINB0)) >> PINB0;
 			data = (data << 1) | dout;
 		} else {
-			if(SCK_DELAY) delayMicroseconds(1); // could be required for faster mcu's, set value in config.h
+			if(SCK_DELAY) timing::delay_us(1); // could be required for faster mcu's, set value in config.h
 		}
 	}
 	if(SCK_DISABLE_INTERRUPTS) sei();

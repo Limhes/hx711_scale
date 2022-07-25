@@ -8,14 +8,14 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
-#include "millis.h"
+#include "timing.h"
 #include "uart.h"
 #include "HX711_ADC.h"
 
 void init(void)
 {
 	uart::init();
-	init_millis(F_CPU);
+	timing::init();
 	sei();
 }
 

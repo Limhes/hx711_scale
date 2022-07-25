@@ -12,7 +12,7 @@ LFUSE = 0xFF
 HFUSE = 0xDA
 
 TARGET = firmware
-SRC = main.cpp HX711_ADC.cpp millis.cpp uart.cpp
+SRC = main.cpp HX711_ADC.cpp timing.cpp uart.cpp
 OBJ = $(SRC:.cpp=.o)
 LST = $(SRC:.cpp=.lst)
 #LIB = /home/rene/.arduino15/packages/arduino/hardware/avr/1.8.5/cores/arduino/

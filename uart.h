@@ -6,11 +6,6 @@
 
 namespace uart
 {
-    namespace
-    {
-        //ISR(USART_RX_vect);
-    }
-
     void init(void);
     void putch(char c);
     void putstring(char* s, bool add_break);
