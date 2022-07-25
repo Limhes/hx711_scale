@@ -16,13 +16,16 @@ void init(void)
 {
 	uart::init();
 	timing::init();
-	sei();
+	sei(); // re-enable interrupts
 }
 
 int main(void)
 {
-	float raw = 0;
-	char outbuf[10];
+	float mass_measured = 0;
+	char outbuf[16];
+	char* inbuf;
+	uint32_t timestamp = 0;
+
 	init();
 
 	HX711_ADC hx;
@@ -36,27 +39,31 @@ int main(void)
 	{
 		if (hx.update())
 		{
-			raw = hx.getData();
+			mass_measured = hx.getData();
 
-			uart::putstring((char*) "mass: ", false);
-			if (raw < 0) uart::putch('-');
-			sprintf(outbuf, "%lu", (uint32_t) fabs(raw));
+			// print CSV data: timestamp, mass measured, debug
+			sprintf(outbuf, "%lu, ", timestamp++);
 			uart::putstring(outbuf, false);
-			uart::putch('.');
-			sprintf(outbuf, "%03lu", ((uint32_t) (fabs(raw*1000.0)))%1000);
-			uart::putstring(outbuf, false);
-			uart::putstring((char*) " g", true);
+			uart::putfloat(mass_measured);
+			uart::putch('\n');
 
 			_delay_ms(1000);
 		}
 
-		// receive command from serial terminal, send 't' to initiate tare operation:
-		if (uart::getch() == 't') hx.tareNoDelay();
-
-		// check if last tare operation is complete:
-		if (hx.getTareStatus())
+		// handle incoming commands: t, m xxx.xxx
+		inbuf = uart::getstring();
+		if (inbuf[0] == 't')
 		{
-			uart::putstring((char*) "Tare complete", true);
+			hx.tareNoDelay();
 		}
+		else if (inbuf[0] == 'm')
+		{
+			hx.getNewCalibration(atof(&inbuf[2]));
+		}
+		//uart::putstring(inbuf, true);
+
+		//if (hx.getTareStatus())
+		//	uart::putstring((char*) "Tare complete", true);
+
 	}
 }

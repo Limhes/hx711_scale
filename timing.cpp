@@ -40,8 +40,6 @@ namespace timing
 
         // Enable the compare match interrupt
         TIMSK1 |= (1 << OCIE1A);
-
-      //REMEMBER TO ENABLE GLOBAL INTERRUPTS AFTER THIS WITH sei(); !!!
     }
 
     unsigned long millis (void)

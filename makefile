@@ -30,7 +30,7 @@ CFLAGS += -mmcu=$(MCU)
 CFLAGS += -std=c++11
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
 CFLAGS += -ffunction-sections -fdata-sections
-CFLAGS += -Wall -Wno-array-bounds
+CFLAGS += -Wall -Wno-array-bounds -Wno-format
 CFLAGS += -Wa,-adhlns=$(<:.cpp=.lst)
 #CFLAGS += -I$(LIB)
 

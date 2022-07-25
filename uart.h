@@ -9,7 +9,8 @@ namespace uart
     void init(void);
     void putch(char c);
     void putstring(char* s, bool add_break);
-    char getch(void);
+    void putfloat(float f);
+    char* getstring(void);
 }
 
 #endif
