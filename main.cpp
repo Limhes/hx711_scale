@@ -32,7 +32,7 @@ int main(void)
 	hx.begin(128); // gain
 	hx.start(1000, true); // stabilizing time, tare
 
-	float calibrationValue = 2172.0;
+	float calibrationValue = 2250.;
 	if (!hx.getTareTimeoutFlag()) hx.setCalFactor(calibrationValue);
 
 	while (true)
